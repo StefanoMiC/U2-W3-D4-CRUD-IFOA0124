@@ -57,42 +57,47 @@
         crossorigin="anonymous"></script>
 
     <script>
-        const params = new URLSearchParams(window.location.search)
+        // Appena si avvia lo script cercherà nell'oggetto window il riferimento alla location.search, che è una stringa
+        // questa stringa viene passata al costruttore URLSearchParams per generare un oggetto avanzato con cui possiamo 
+        // gestire il singolo parametro che abbiamo nella URL in questo momento
+        // o una serie di parametri che potrebbero esserci nella URL in uno scenario più realistico.
+        const params = new URLSearchParams(window.location.search) // oggetto costruito a partire dai parametri nella URL es. ?agendaId=2938123
 
-        const appointmentId = params.get("agendaId")
+        const appointmentId = params.get("agendaId") // metodo sull'oggetto URLSearchParams che ci estrae il valore corrispondente alla chiave "agendaId" da noi scelta e applicata al link in homepage
 
         console.log("RESOURCE ID:", appointmentId)
 
         const URL = "https://striveschool-api.herokuapp.com/api/agenda/" + appointmentId
+        // al caricamento della pagina facciamo richiesta al server di tornarci i dati specifici della risorsa con l'id che troviamo nella URL
+        window.onload = () => {
+            fetch(URL)
+                .then(response => {
+                    console.log(response)
 
-        fetch(URL)
-            .then(response => {
-                console.log(response)
+                    if (response.ok) {
+                        return response.json()
+                    } else {
+                        if (response.status === 400) {
+                            throw new Error("400 - Errore lato client")
+                        }
 
-                if (response.ok) {
-                    return response.json()
-                } else {
-                    if (response.status === 400) {
-                        throw new Error("400 - Errore lato client")
+                        if (response.status === 404) {
+                            throw new Error("404 - Dato non trovato")
+                        }
+
+                        if (response.status === 500) {
+                            throw new Error("500 - Errore lato server")
+                        }
+
+                        throw new Error("Errore nel reperimento dati")
                     }
+                })
+                .then(appointment => {
+                    console.log(appointment)
 
-                    if (response.status === 404) {
-                        throw new Error("404 - Dato non trovato")
-                    }
-
-                    if (response.status === 500) {
-                        throw new Error("500 - Errore lato server")
-                    }
-
-                    throw new Error("Errore nel reperimento dati")
-                }
-            })
-            .then(appointment => {
-                console.log(appointment)
-
-                const container = document.getElementById("appointment-details")
-
-                container.innerHTML = `
+                    const container = document.getElementById("appointment-details")
+                    //  creiamo la struttura già con i dati ottenuti dal server
+                    container.innerHTML = `
                                     <h1 class="display-5">${appointment.name}</h1>
                                     <p class="font-monospace">${new Date(appointment.time).toLocaleString()}</p>
                                     <p class="lead">${appointment.description}</p>
@@ -105,11 +110,15 @@
                                     </ul>
                                     <button class="btn btn-success mt-3" onclick="handleBtnClick()">Modifica Appuntamento</button>
                                     `
-            })
-            .catch(err => console.log(err))
+                })
+                .catch(err => console.log(err))
+        }
 
+        // questo è un metodo alternativo ad una <a href=""> per gestire il cambio pagina in maniera programmatica (es. da una funzione)
         const handleBtnClick = () => {
+            // questo metodo mi porterà a backoffice con già un id applicato nella URL
             window.location.assign("./backoffice.html?agendaId=" + appointmentId)
+            // la pagina, per come l'abbiamo impostata sarà in grado di accorgersi che ha ricevuto un id e si comporterà di conseguenza per andare in modalità "modifica"
         }
     </script>
 </body>

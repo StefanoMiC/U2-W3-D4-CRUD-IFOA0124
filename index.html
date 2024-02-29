@@ -84,13 +84,18 @@
                 console.log(agendaList)
 
                 const ul = document.getElementById("currentAppointments")
+
+                // agendaList rappresenta l'array di oggetti che sono i singoli appuntamenti
                 agendaList.forEach((appointment) => {
+                    // il forEach ci rende disponibile il singolo oggetto dell'array tramite il parametro appointment
+                    // creiamo un nuovo elemento della listsa e gli aggiungiamo nuovi elementi e i dati provenienti dal server
                     const li = document.createElement("li")
                     li.className = "list-group-item d-flex align-items-center column-gap-2"
                     li.innerHTML = `<strong>${new Date(appointment.time).toLocaleDateString()}</strong> — <span class="me-auto">${appointment.name}</span>  <span class="badge ${appointment.price ? "text-bg-dark" : "text-bg-success"}">${appointment.price ? appointment.price : "gratis"}</span> <a href="./details.html?agendaId=${appointment._id}">Dettagli</a>`
                     ul.appendChild(li)
                 })
             })
+            // il catch si occupa di raccogliere qualsiasi errore in modo che non rompa il contesto di esecuzione
             .catch(err => console.log(err))
     </script>
 </body>
